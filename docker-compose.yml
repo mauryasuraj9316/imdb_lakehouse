@@ -1,0 +1,64 @@
+services:
+  spark-master:
+    image: apache/spark:3.5.1
+    container_name: spark-master
+    user: "0:0"
+    command: >
+      bash -c "mkdir -p /data/lake && chmod -R a+rwx /data/lake &&
+      exec /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master"
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+    ports:
+      - "8081:8080"
+      - "7077:7077"
+    volumes:
+      - ./data:/data
+      - ./etl_job.py:/opt/spark/work-dir/etl_job.py
+      - ./benchmark.py:/opt/spark/work-dir/benchmark.py
+    networks:
+      - imdb-pipeline
+
+  spark-worker:
+    image: apache/spark:3.5.1
+    container_name: spark-worker
+    user: "0:0"
+    command: >
+      bash -c "mkdir -p /data/lake && chmod -R a+rwx /data/lake &&
+      exec /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker
+      --memory 4g --cores 2 spark://spark-master:7077"
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+    depends_on:
+      - spark-master
+    volumes:
+      - ./data:/data
+      - ./etl_job.py:/opt/spark/work-dir/etl_job.py
+      - ./benchmark.py:/opt/spark/work-dir/benchmark.py
+    networks:
+      - imdb-pipeline
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.3
+    container_name: clickhouse
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./data:/data
+      - ./ddl:/ddl
+      - ./load_to_olap.py:/load_to_olap.py
+      - ./clickhouse/users.d:/etc/clickhouse-server/users.d
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    networks:
+      - imdb-pipeline
+
+volumes:
+  clickhouse_data:
+
+networks:
+  imdb-pipeline:
+    driver: bridge

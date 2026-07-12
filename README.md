@@ -314,7 +314,7 @@ Spark excels at distributed ETL and batch processing but incurs JVM startup, Cat
 ## Project Structure
 
 ```
-test/
+imdb_lakehouse/
 ├── docker-compose.yml      # Spark Master/Worker + ClickHouse
 ├── etl_job.py              # PySpark ETL → Parquet lake
 ├── load_to_olap.py         # Parquet → ClickHouse loader

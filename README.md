@@ -44,7 +44,7 @@ ls -lh data/raw/
 ## Step 2: Start Infrastructure
 
 ```bash
-cd /home/surajmaurya/test
+cd /home/surajmaurya/imdb_lakehouse
 docker compose up -d
 ```
 
@@ -92,7 +92,7 @@ Partitioning:
 From the project folder, create a virtual environment and install dependencies (required on Ubuntu/WSL — do not use system `pip` directly):
 
 ```bash
-cd /home/surajmaurya/test
+cd /home/surajmaurya/imdb_lakehouse
 
 python3 -m venv .venv
 source .venv/bin/activate
